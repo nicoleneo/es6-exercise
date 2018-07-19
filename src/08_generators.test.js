@@ -4,18 +4,18 @@
 describe('generator can be created in multiple ways', () => {
 
   it('the most common way is by adding `*` after `function`', () => {
-    function g() {}
+    function* g() {}
     assertIsGenerator(g())
   })
 
   it('as a function expression, by adding a `*` after `function`', () => {
-    let g = () => {}
+    let g = function* () {}
     assertIsGenerator(g())
   })
 
   it('inside an object by prefixing the function name with `*`', () => {
     let obj = {
-      g() {}
+      *g() {}
     }
     assertIsGenerator(obj.g())
   })
@@ -23,7 +23,7 @@ describe('generator can be created in multiple ways', () => {
   it('computed generator names, are just prefixed with a `*`', () => {
     const generatorName = 'g'
     let obj = {
-      [generatorName]() {}
+      *[generatorName]() {}
     }
     assertIsGenerator(obj.g())
   })
@@ -54,13 +54,13 @@ describe('generator - `yield` is used to pause and resume a generator function',
   describe('after the first `generator.next()` call', () => {
 
     it('the value is "hello"', () => {
-      const {value} = generator.next
+      const {value} = generator.next()
       
       expect(value).toEqual('hello')
     })
 
     it('and `done` is false', () => {
-      const {done} = generator
+      const {done} = generator.next()
 
       expect(done).toEqual(false)
     })
@@ -71,6 +71,7 @@ describe('generator - `yield` is used to pause and resume a generator function',
 
     let secondItem
     beforeEach(() => {
+      generator.next()
       secondItem = generator.next()
     })
 
@@ -81,7 +82,7 @@ describe('generator - `yield` is used to pause and resume a generator function',
     })
 
     it('and `done` is still false', () => {
-      const done = secondItem
+      const {done} = secondItem
 
       expect(done).toEqual(false)
     })
@@ -92,7 +93,7 @@ describe('generator - `yield` is used to pause and resume a generator function',
     it('`done` property equals true, since there is nothing more to iterator over', () => {
       generator.next()
       generator.next()
-      let done = generator.done
+      let {done} = generator.next()
 
       expect(done).toEqual(true)
     })
@@ -115,17 +116,17 @@ describe('pass a value to a generator', () => {
     const convertedToAnArray = Array.from(generatorFunction())
     // way #2
     const iterator = generatorFunction()
-    var iteratedOver = [iterator.next().___, iterator.___]
+    var iteratedOver = [iterator.next().value, iterator.next().value]
 
     expect(convertedToAnArray).toEqual(iteratedOver)
   })
 
   it('pass a value to the iterator', () => {
-    function* generatorFunction() {
+    function* generatorFunction(param) {
       yield 1
       yield param
     }
-    const iterator = generatorFunction()
+    const iterator = generatorFunction(2)
     const iteratedOver = [iterator.next().value, iterator.next(2).value]
 
     expect([1, 2]).toEqual(iteratedOver)
@@ -134,6 +135,7 @@ describe('pass a value to a generator', () => {
   it('a value passed to the 1st `next()` call is ignored', () => {
     function* generatorFunction() {
       yield 1
+      yield 2
     }
     let iterator = generatorFunction()
     const values = [

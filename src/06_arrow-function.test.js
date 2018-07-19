@@ -8,8 +8,8 @@ describe('06 Arrow functions', () => {
       add: function (age) {
         // finish the implementation of the next function using an arrow function
         // and using the parameter v
-        function f(v) {
-          return thils.age
+        var f = (v) => {
+          return this.age+1
         }
 
         return f(age)
